@@ -1,0 +1,450 @@
+openapi: 3.0.1
+info:
+  title: 書籍管理システムのバックエンドAPI
+  description: Book CRUD Restful API
+  version: v1
+servers:
+  - url: http://localhost:8080/
+    description: 書籍管理システムAPI server
+paths:
+  /api/v1/book/{book_id}:
+    get:
+      tags:
+        - 書籍管理システム
+      description: 書籍一覧取得APIで取得したBook idから取得する
+      summary: 書籍詳細取得API（1件）
+      operationId: getBookById
+      parameters:
+        - $ref: '#/components/parameters/BookIDParam'
+      responses:
+        '200':
+          description: 1件書籍情報取得
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BookResponseForm'
+        '400':
+          $ref: '#/components/responses/400titleDuplicated'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '405':
+          $ref: '#/components/responses/405NotAllowed'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+    put:
+      tags:
+        - 書籍管理システム
+      description: 変更された書籍詳細情報を返却する
+      summary: 書籍変更API（1件）
+      operationId: updateBookById
+      parameters:
+        - $ref: '#/components/parameters/BookIDParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookReceiveForm'
+        required: true
+      responses:
+        '200':
+          description: 1件書籍情報取得
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BookResponseForm'
+        '400':
+          $ref: '#/components/responses/400titleDuplicated'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '405':
+          $ref: '#/components/responses/405NotAllowed'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+
+  /api/book:
+    get:
+      tags:
+        - 書籍管理システム
+      description: | 
+        書籍一覧情報取得API<br>
+        authorパラメータ入力する場合は著者に紐づく本を取得する
+
+      summary: 書籍一覧取得API
+      operationId: getBooks
+      parameters:
+        - in: body
+          name: author
+          description: 著者に紐づく本を取得する
+          schema:
+            type: object
+            properties:
+              authorName:
+                type: string
+      responses:
+        '200':
+          description: 書籍情報取得
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BookResponseForm'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+    post:
+      tags:
+        - 書籍管理システム
+      description: 書籍及び著者を登録し, 登録した書籍詳細を返却する.
+      summary: 書籍登録API（1件）
+      operationId: createBook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookReceiveForm'
+        required: true
+      responses:
+        '201':
+          description: 1件書籍情報登録
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BookResponseForm'
+        '400':
+          $ref: '#/components/responses/400titleDuplicated'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '405':
+          $ref: '#/components/responses/405NotAllowed'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+  /api/v1/author/{author_id}:
+    get:
+      tags:
+        - 著者管理システム
+      description: 著者一覧取得APIで取得した著者IDから取得する
+      summary: 著者詳細取得API（1件）
+      operationId: getAuthorById
+      parameters:
+        - $ref: '#/components/parameters/AuthorIDParam'
+      responses:
+        '200':
+          description: 1件著者情報取得
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AuthorResponseForm'
+        '400':
+          $ref: '#/components/responses/400AuthorDuplicated'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '405':
+          $ref: '#/components/responses/405NotAllowed'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+    put:
+      tags:
+        - 著者管理システム
+      description: 変更された著者詳細情報を返却する
+      summary: 著者情報変更API（1件）
+      operationId: updateAuthorById
+      parameters:
+        - $ref: '#/components/parameters/AuthorIDParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorReceiveForm'
+        required: true
+      responses:
+        '200':
+          description: 1件著者情報取得
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AuthorResponseForm'
+        '400':
+          $ref: '#/components/responses/400AuthorDuplicated'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '405':
+          $ref: '#/components/responses/405NotAllowed'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+
+  /api/author:
+    get:
+      tags:
+        - 著者管理システム
+      description: |
+        著者一覧情報取得API<br>
+        authorパラメータ入力する場合は著者名で検索する
+
+      summary: 著者一覧取得API
+      operationId: getAuthors
+      parameters:
+        - in: body
+          name: author
+          description: 著者名で検索する
+          schema:
+            type: object
+            properties:
+              authorName:
+                type: string
+      responses:
+        '200':
+          description: 著者情報取得
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AuthorResponseForm'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+    post:
+      tags:
+        - 著者管理システム
+      description: 著者を登録し, 登録した著者詳細を返却する.
+      summary: 著者登録API（1件）
+      operationId: createAuthor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorReceiveForm'
+        required: true
+      responses:
+        '201':
+          description: 1件著者情報登録
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AuthorResponseForm'
+        '400':
+          $ref: '#/components/responses/400AuthorDuplicated'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '405':
+          $ref: '#/components/responses/405NotAllowed'
+        '500':
+          $ref: '#/components/responses/500ServerError'
+components:
+  schemas:
+    BookReceiveForm:
+      required:
+        - title
+        - price
+        - publishStatus
+        - authors
+      type: object
+      properties:
+        title:
+          type: string
+          description: 書籍タイトル
+          example: "Book A"
+        price:
+          type: number
+          format: float
+          description: 書籍価格
+          example: 100
+        publishStatus:
+          type: string
+          enum: ["unpublish","published"]
+          example: "published"
+        authors:
+          type: array
+          description: 著者情報リスト
+          items:
+            type: object
+            required:
+              - authorName
+              - birthdate
+            properties:
+              authorName:
+                type: string
+                description: 著者名
+                example: "author A"
+              birthdate:
+                type: string
+                format: date
+                description: 著者誕生日 (YYYY-MM-DD)
+                example: "2023-01-01"
+    BookResponseForm:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 書籍ID
+          example: 1
+        title:
+          type: string
+          description: 書籍タイトル
+          example: "Book A"
+        price:
+          type: number
+          format: float
+          description: 書籍価格
+          example: 100
+        publishStatus:
+          type: string
+          enum: [ "unpublish","published" ]
+          example: "published"
+        authors:
+          type: array
+          description: 著者情報リスト
+          items:
+            type: object
+            required:
+              - authorName
+              - birthdate
+            properties:
+              authorName:
+                type: string
+                description: 著者名
+                example: "author A"
+              birthdate:
+                type: string
+                format: date
+                description: 著者誕生日 (YYYY-MM-DD)
+                example: "2023-01-01"
+    AuthorReceiveForm:
+      type: object
+      required:
+        - authorName
+        - birthdate
+      properties:
+        authorName:
+          type: string
+          description: 著者名
+          example: "author A"
+        birthdate:
+          type: string
+          format: date
+          description: 著者誕生日 (YYYY-MM-DD)
+          example: "2023-01-01"
+    AuthorResponseForm:
+      type: object
+      required:
+        - id
+        - authorName
+        - birthdate
+      properties:
+        id:
+          type: integer
+          description: 著者ID
+          example: 1
+        authorName:
+          type: string
+          description: 著者名
+          example: "author A"
+        birthdate:
+          type: string
+          format: date
+          description: 著者誕生日 (YYYY-MM-DD)
+          example: "2023-01-01"
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      description: bearer OAuth token after gitHub Login
+      scheme: bearer
+  responses:
+    400titleDuplicated: # Can be referenced as '#/components/responses/400titleDuplicated'
+      description: ID Not Found
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              message:
+                type: string
+                example: "Invalid Request"
+              detail:
+                type: string
+                example: "Book {title} has already exist"
+    400AuthorDuplicated: # Can be referenced as '#/components/responses/400AuthorDuplicated'
+      description: ID Not Found
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              message:
+                type: string
+                example: "Invalid Request"
+              detail:
+                type: string
+                example: "Author {authorName} has already exist"
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    404NotFound: # Can be referenced as '#/components/responses/404NotFound'
+      description: ID Not Found
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              message:
+                type: string
+                example: "ID Not Found"
+              detail:
+                type: string
+    405NotAllowed: # Can be referenced as '#/components/responses/405NotAllowed'
+      description: Method Not Supported
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              message:
+                type: string
+                example: "Method Not Supported"
+              detail:
+                type: string
+                example: "Request method 'method_name' not supported"
+    500ServerError: # Can be referenced as '#/components/responses/500ServerError'
+      description: Unexpected Error
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              message:
+                type: string
+                example: "Something went wrong ...  Server Error"
+              detail:
+                type: string
+  parameters:
+    BookIDParam: # Can be referenced via '#/components/parameters/BookIDParam'
+      name: id
+      in: path
+      description: Book Object ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+    AuthorIDParam: # Can be referenced via '#/components/parameters/AuthorIDParam'
+      name: id
+      in: path
+      description: Author ID
+      required: true
+      schema:
+        type: integer
+        format: int64
+security:
+  - bearerAuth: []         # use the same name as above
