@@ -63,7 +63,7 @@ paths:
         '500':
           $ref: '#/components/responses/500ServerError'
 
-  /api/book:
+  /api/v1/book:
     get:
       tags:
         - 書籍管理システム
@@ -73,15 +73,14 @@ paths:
 
       summary: 書籍一覧取得API
       operationId: getBooks
-      parameters:
-        - in: body
-          name: author
-          description: 著者に紐づく本を取得する
-          schema:
-            type: object
-            properties:
-              authorName:
-                type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authorName:
+                  type: string
       responses:
         '200':
           description: 書籍情報取得
@@ -174,7 +173,7 @@ paths:
         '500':
           $ref: '#/components/responses/500ServerError'
 
-  /api/author:
+  /api/v1/author:
     get:
       tags:
         - 著者管理システム
