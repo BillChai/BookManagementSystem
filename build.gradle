@@ -1,8 +1,12 @@
+import org.jooq.meta.jaxb.Logging
+
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.25'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
     id 'org.springframework.boot' version '3.3.4'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'nu.studer.jooq' version '8.2'
+    id("org.flywaydb.flyway") version "8.0.1" //これも追加
 }
 
 group = 'org.example'
@@ -21,6 +25,8 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jooq'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'jakarta.validation:jakarta.validation-api'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
@@ -31,6 +37,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    jooqGenerator 'org.postgresql:postgresql:42.7.2'
+    jooqGenerator 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
 }
 
 kotlin {
@@ -41,4 +49,42 @@ kotlin {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+jooq {
+    version = '3.18.4'
+
+    configurations {
+        main {
+            generateSchemaSourceOnCompilation = true
+            generationTool {
+                logging = Logging.DEBUG
+                jdbc {
+                    driver = 'org.postgresql.Driver'
+                    url = 'jdbc:postgresql://localhost:5432/mydatabase'
+                    user = 'myuser'
+                    password = 'secret'
+                }
+                generator {
+                    name = 'org.jooq.codegen.KotlinGenerator'
+                    database {
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = 'public'
+                    }
+                    generate {}
+                    target {
+                        packageName = 'org.jooq.model'
+                        directory = './build/generated-src/jooq/main'
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
+}
+
+flyway {
+    url = "jdbc:postgresql://localhost:5432/mydatabase"
+    user = "myuser"
+    password = "secret"
 }
