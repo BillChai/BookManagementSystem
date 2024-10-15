@@ -11,62 +11,65 @@ interface AuthorRepository {
     fun findById(id: Long): Author?
     fun findAll(): List<Author>
     fun insert(name: String, birthDate: LocalDate): Author
-    fun update(id: Long, name: String?, birthDate: LocalDate?): Int
+    fun update(id: Long, name: String?, birthDate: LocalDate?)
 }
 
 @Repository
 class AuthorRepositoryImpl(
     private val dslContext: DSLContext
 ) : AuthorRepository {
-    override fun findById(id: Long): Author? {
-        return this.dslContext.select()
+    /**
+     * get author by id in author table
+     * @param id
+     */
+    override fun findById(id: Long): Author? = wrapDatabaseOperation{
+        this.dslContext.select()
             .from(AUTHORS)
             .where(AUTHORS.ID.eq(id))
             .fetchOne()?.let { toModel(it) }
     }
 
-    override fun findAll(): List<Author> {
-        return this.dslContext.select()
+    /**
+     * get all authors in author table
+     */
+    override fun findAll(): List<Author> = wrapDatabaseOperation{
+        this.dslContext.select()
             .from(AUTHORS)
             .fetch().map { toModel(it) }
     }
 
-    override fun insert( name: String, birthDate: LocalDate): Author {
+    /**
+     * insert author to author table
+     * @param name author name
+     * @param birthDate author birthday
+     */
+    override fun insert( name: String, birthDate: LocalDate): Author = wrapDatabaseOperation{
         val record = this.dslContext.newRecord(AUTHORS).also {
             it.name = name
             it.birthdate = birthDate
             it.store()
         }
-        return Author(record.id!!, record.name!!, record.birthdate!!)
+        return@wrapDatabaseOperation Author(record.id!!, record.name!!, record.birthdate!!)
     }
 
-    override fun update(id: Long, name: String?, birthDate: LocalDate?): Int {
-        // Check if there's anything to update
-        if (name == null && birthDate == null) return 0
+    /**
+     * update author for which param exist in author table
+     * @param id author id
+     * @param name author name
+     * @param birthDate author birthday
+     */
+    override fun update(id: Long, name: String?, birthDate: LocalDate?): Unit = wrapDatabaseOperation{
+        val record = dslContext.newRecord(AUTHORS)
 
-        // Initialize SQL builder
-        val sqlBuilder = StringBuilder("UPDATE authors SET ")
-        val params = mutableListOf<Any>()  // Store parameters for binding
+        name?.let { record[AUTHORS.NAME] = it }
+        birthDate?.let { record[AUTHORS.BIRTHDATE] = it }
 
-        // Add fields dynamically
-        if (name != null) {
-            sqlBuilder.append("name = ?, ")
-            params.add(name)
-        }
-        if (birthDate != null) {
-            sqlBuilder.append("birthdate = ?, ")
-            params.add(birthDate)
-        }
-
-        // Remove the trailing ", " and add the WHERE clause
-        sqlBuilder.setLength(sqlBuilder.length - 2)  // Remove last ", "
-        sqlBuilder.append(" WHERE id = ?")
-        params.add(id)
-
-        // Execute the query with parameter binding
-        return dslContext.execute(sqlBuilder.toString(), *params.toTypedArray())
+        dslContext.update(AUTHORS).set(record).where(AUTHORS.ID.eq(id)).execute()
     }
 
+    /**
+     * transfer author data to entity
+     */
     private fun toModel(record: Record) = Author(
         record.getValue(AUTHORS.ID)!!,
         record.getValue(AUTHORS.NAME)!!,

@@ -5,9 +5,9 @@ import jakarta.validation.constraints.Past
 import java.time.LocalDate
 
 data class AuthorRegisterDto(
-    @field:NotBlank(message = "著者名は必須です。")
+    @field:NotBlank(message = "author can't not be blank")
     val name: String,
 
-    @field:Past(message = "誕生日は過去の日付でなければなりません。")
+    @field:Past(message = "author birthDate can't be future day")
     val birthDate: LocalDate
 )

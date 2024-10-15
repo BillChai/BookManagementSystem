@@ -2,34 +2,37 @@ package org.example.quocardcodingtest.repository
 
 import org.example.quocardcodingtest.dto.BookRegisterDto
 import org.example.quocardcodingtest.dto.BookUpdateDto
-import org.example.quocardcodingtest.model.Author
 import org.example.quocardcodingtest.model.Book
 import org.jooq.Record
 import org.jooq.DSLContext
-import org.jooq.TableField
 import org.jooq.impl.DSL
 import org.jooq.model.tables.Authors.Companion.AUTHORS
 import org.jooq.model.tables.BookAuthor.Companion.BOOK_AUTHOR
 import org.jooq.model.tables.Books.Companion.BOOKS
-import org.jooq.model.tables.records.BooksRecord
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
+import java.math.BigDecimal
 
 interface BookRepository {
     fun findById(id: Long): Book?
     fun findAll(): List<Book>
+    fun findAllByAuthor(authorName: String): List<Book>
     fun insert(bookRegisterDto: BookRegisterDto): Long
     fun update(id: Long, bookUpdateDto: BookUpdateDto)
 }
 
 @Transactional
 @Repository
-class BookRepositoryImpl (
-    private val dslContext: DSLContext
+class BookRepositoryImpl(
+    private val dslContext: DSLContext,
 ) : BookRepository {
-    override fun findAll(): List<Book> {
-        return dslContext.select(
+
+    /**
+     * get all book
+     * combine book and author from book table/author table/book_author table
+     */
+    override fun findAll(): List<Book> = wrapDatabaseOperation {
+         dslContext.select(
             BOOKS.ID,
             BOOKS.TITLE,
             BOOKS.PRICE,
@@ -44,8 +47,35 @@ class BookRepositoryImpl (
             .map { record -> toModel(record) }
     }
 
-    override fun findById(id: Long): Book? {
-        return dslContext.select(
+    /**
+     * get all book by author name (all same)
+     * combine book and author from book table/author table/book_author table
+     * @param authorName author name
+     */
+    override fun findAllByAuthor(authorName: String): List<Book> = wrapDatabaseOperation{
+        dslContext.select(
+            BOOKS.ID,
+            BOOKS.TITLE,
+            BOOKS.PRICE,
+            BOOKS.PUBLISHED_STATUS,
+            DSL.field("STRING_AGG(${AUTHORS.NAME}, ', ')").`as`("authors") // Specify the alias explicitly
+        )
+            .from(BOOKS)
+            .leftJoin(BOOK_AUTHOR).on(BOOKS.ID.eq(BOOK_AUTHOR.BOOK_ID))
+            .leftJoin(AUTHORS).on(BOOK_AUTHOR.AUTHOR_ID.eq(AUTHORS.ID))
+            .where(AUTHORS.NAME.eq(authorName))
+            .groupBy(BOOKS.ID) // Group by book ID to aggregate authors
+            .fetch()
+            .map { record -> toModel(record) }
+    }
+
+    /**
+     * get book by id
+     * combine book and author from book table/author table/book_author table
+     * @param id book id
+     */
+    override fun findById(id: Long): Book? = wrapDatabaseOperation {
+         dslContext.select(
             BOOKS.ID,
             BOOKS.TITLE,
             BOOKS.PRICE,
@@ -63,7 +93,12 @@ class BookRepositoryImpl (
             .firstOrNull() // Return the first (or null if not found)
     }
 
-    override fun insert(bookRegisterDto: BookRegisterDto): Long {
+    /**
+     * insert book
+     * combine book and author from book table/author table/book_author table
+     * @param bookRegisterDto contain title/price/publish_status and author list
+     */
+    override fun insert(bookRegisterDto: BookRegisterDto): Long = wrapDatabaseOperation {
         // 1. Insert book into books table and get the generated book ID
         val bookId = dslContext.insertInto(BOOKS)
             .set(BOOKS.TITLE, bookRegisterDto.title)
@@ -93,37 +128,23 @@ class BookRepositoryImpl (
                 .execute()
         }
 
-        return bookId
+        return@wrapDatabaseOperation bookId
     }
 
-    override fun update(id: Long, bookUpdateDto: BookUpdateDto) {
+    /**
+     * update book with book param and author
+     * if author != null: remove all author and replace with new one
+     */
+    override fun update(id: Long, bookUpdateDto: BookUpdateDto) = wrapDatabaseOperation {
         // 1. Update the books table
         if (bookUpdateDto.title != null || bookUpdateDto.price != null || bookUpdateDto.publishStatus != null){
-            // Initialize SQL builder
-            val sqlBuilder = StringBuilder("UPDATE $BOOKS SET ")
-            val params = mutableListOf<Any>()  // Store parameters for binding
+            val record = dslContext.newRecord(BOOKS)
 
-            // Add fields dynamically
-            if (bookUpdateDto.title != null) {
-                sqlBuilder.append("title = ?, ")
-                params.add(bookUpdateDto.title)
-            }
-            if (bookUpdateDto.price != null) {
-                sqlBuilder.append("price = ?, ")
-                params.add(bookUpdateDto.price)
-            }
-            if (bookUpdateDto.publishStatus != null) {
-                sqlBuilder.append("publishStatus = ?, ")
-                params.add(bookUpdateDto.publishStatus)
-            }
+            bookUpdateDto.title?.let { record[BOOKS.TITLE] = it }
+            bookUpdateDto.price?.let { BigDecimal(it).let { record[BOOKS.PRICE] = it } }
+            bookUpdateDto.publishStatus?.let { record[BOOKS.PUBLISHED_STATUS] = it }
 
-            // Remove the trailing ", " and add the WHERE clause
-            sqlBuilder.setLength(sqlBuilder.length - 2)  // Remove last ", "
-            sqlBuilder.append(" WHERE id = ?")
-            params.add(id)
-
-            // Execute the query with parameter binding
-            dslContext.execute(sqlBuilder.toString(), *params.toTypedArray())
+            dslContext.update(BOOKS).set(record).where(BOOKS.ID.eq(id)).execute()
         }
 
         // 2. Delete all existing authors for this book (optional: only if authors were provided)
@@ -150,6 +171,9 @@ class BookRepositoryImpl (
         }
     }
 
+    /**
+     * transfer book data to entity
+     */
     private fun toModel(record: Record): Book {
         val authorNames = (record["authors"] as String).split(", ") // Split concatenated author names into a list
         return Book(

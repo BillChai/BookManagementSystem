@@ -31,12 +31,22 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+    // db
     runtimeOnly 'org.postgresql:postgresql'
+
+    // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.h2database:h2") // In-memory database for testing
+    testImplementation("org.jooq:jooq")
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // jooq generator
     jooqGenerator 'org.postgresql:postgresql:42.7.2'
     jooqGenerator 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
 }

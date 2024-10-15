@@ -9,20 +9,14 @@ import org.example.quocardcodingtest.service.BookService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1")
-class ApiController (
+class ApiController(
     private val authorService: AuthorService,
     private val bookService: BookService
-){
+) {
     @GetMapping("/healthcheck")
     fun getHealthCheck(): ResponseEntity<Any> {
         return ResponseEntity.ok().build()
@@ -34,13 +28,16 @@ class ApiController (
     }
 
     @PutMapping("/book/{bookId}")
-    fun updateBookById(@PathVariable bookId: Long, @Validated @RequestBody bookUpdateDto: BookUpdateDto): ResponseEntity<Any> {
+    fun updateBookById(
+        @PathVariable bookId: Long,
+        @Validated @RequestBody bookUpdateDto: BookUpdateDto
+    ): ResponseEntity<Any> {
         return restructureResponse(bookService.updateBookService(bookId, bookUpdateDto))
     }
 
     @GetMapping("/books")
-    fun getBooks(): ResponseEntity<Any> {
-        return restructureResponse(bookService.getBooksService())
+    fun getBooks(@RequestParam authorName: String?): ResponseEntity<Any> {
+        return restructureResponse(bookService.getBooksService(authorName))
     }
 
     @PostMapping("/book")
@@ -55,7 +52,10 @@ class ApiController (
     }
 
     @PutMapping("/author/{authorId}")
-    fun updateAuthorById(@PathVariable authorId: Long, @Validated @RequestBody authorUpdateDto: AuthorUpdateDto): ResponseEntity<Any> {
+    fun updateAuthorById(
+        @PathVariable authorId: Long,
+        @Validated @RequestBody authorUpdateDto: AuthorUpdateDto
+    ): ResponseEntity<Any> {
         return restructureResponse(authorService.updateAuthorService(authorId, authorUpdateDto))
     }
 
@@ -69,11 +69,18 @@ class ApiController (
         return restructureResponse(authorService.insertAuthorService(authorRegisterDto))
     }
 
-    private fun <T> restructureResponse(data: T?, errorMessage: String? = null, status: HttpStatus = HttpStatus.OK): ResponseEntity<Any> {
+    private fun <T> restructureResponse(
+        data: T?,
+        errorMessage: String? = null,
+        status: HttpStatus = HttpStatus.OK
+    ): ResponseEntity<Any> {
         return when {
             data != null -> ResponseEntity(data, status) // Return the data as a ResponseEntity
             errorMessage != null -> ResponseEntity(mapOf("error" to errorMessage), status) // Return error message
-            else -> ResponseEntity("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR) // Default response when no data and no error message
+            else -> ResponseEntity(
+                "Something went wrong",
+                HttpStatus.INTERNAL_SERVER_ERROR
+            ) // Default response when no data and no error message
         }
     }
 
