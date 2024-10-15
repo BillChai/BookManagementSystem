@@ -1,9 +1,12 @@
 services:
   postgres:
     image: 'postgres:latest'
+    restart: always
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      POSTGRES_DB: "mydatabase"
+      POSTGRES_USER: "myuser"
+      POSTGRES_PASSWORD: "secret"
+#    volumes:
+#      - ./postgres/init:/docker-entrypoint-initdb.d
     ports:
-      - '5432'
+      - '5432:5432'
