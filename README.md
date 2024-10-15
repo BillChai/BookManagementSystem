@@ -1,20 +1,49 @@
-# Quo Card Coding Test
+# Book Management System API
 
-## task
+![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=for-the-badge&logo=Gradle&logoColor=white)![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)
 
-- [ ] swagger
-  - [ ] post api insert book and writer
-  - [ ] put api update book and writer
-  - [ ] get api get by writer
-- [ ] DB schema
-- [ ] entity, DAO and DTO
-- [ ] service
-  - [ ] validation
-  - [ ] query
-- [ ] controller
-- [ ] Test code
-- [ ] README description
+This project is designed to build the backend API for a book management system. No frontend implementation is required, and the following functionalities are implemented.
 
-## Install
+## Overview
 
-## Description
+This API provides functionalities to manage information about books and authors. Users can register and update information about books and authors in an RDB, as well as fetch books associated with specific authors.
+
+## Features
+
+- Register and update information about books and authors
+- Retrieve books linked to authors
+
+## Technical Stack
+
+- Language: Kotlin
+- Framework: Spring Boot
+- ORM: jOOQ
+- Database: PostgreSQL
+- Testing: Junit
+
+## Installation
+
+1. Clone the repository.
+    ```bash
+    git clone git@github.com:BillChai/BookManagementSystem.git
+    ```
+
+2. Navigate to the project directory.
+    ```bash
+    cd BookManagementSystem
+    ```
+3. Start docker
+   ```bash
+   docker-compose up -d
+   ```
+4. Install dependencies.
+    ```bash
+    ./gradlew build
+    ```
+
+## Running the Application
+
+You can run the application using the following command:
+```bash
+./gradlew bootRun
