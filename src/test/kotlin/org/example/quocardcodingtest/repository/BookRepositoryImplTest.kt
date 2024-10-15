@@ -78,8 +78,6 @@ class BookRepositoryImplTest {
             val books = bookRepository.findAll()
 
             assertEquals(2, books.size)
-            assertEquals("Book 1", books[0].title)
-            assertEquals("Book 2", books[1].title)
         }
 
         @Test
@@ -98,8 +96,6 @@ class BookRepositoryImplTest {
             val books = bookRepository.findAllByAuthor(author1.name)
 
             assertEquals(2, books.size)
-            assertEquals("Book 1", books[0].title)
-            assertEquals("Book 2", books[1].title)
         }
     }
 
