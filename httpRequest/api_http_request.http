@@ -1,56 +1,66 @@
-###
+### HealthCheck
+GET http://localhost:8080/api/v1/healthcheck
+
+### 著者登録API（1件）
 POST http://localhost:8080/api/v1/author
 Content-Type: application/json
 
 {
-  "name": "",
-  "birthDate": ""
+  "name": "author test",
+  "birthDate": "1998-01-01"
 }
 
-###
+### 著者取得API（1件）
+@authorId = variable value
 GET http://localhost:8080/api/v1/author/{{authorId}}
 
-###
+### 著者更新API（1件）
 PUT http://localhost:8080/api/v1/author/{{authorId}}
 Content-Type: application/json
 
 {
-  "name": "",
+  "name": "Author 1",
   "birthDate": ""
 }
 
-###
+### 著者取得API（全件）
 GET http://localhost:8080/api/v1/authors
 
-<> 2024-10-15T220608.200.json
-
-###
+### 書籍登録API (一件)
 POST http://localhost:8080/api/v1/book
 Content-Type: application/json
 
 {
-  "title": "",
-  "price": 0,
+  "title": "Book Test",
+  "price": 1,
   "publishStatus": false,
-  "author": []
+  "author": [
+    {
+      "name": "Author 1",
+      "birthDate": "1998-01-01"
+    }
+  ]
 }
 
-###
+### 書籍取得API (一件)
+@bookId = variable value
 GET http://localhost:8080/api/v1/book/{{bookId}}
 
-###
+### 書籍登録API (一件)
 PUT http://localhost:8080/api/v1/book/{{bookId}}
 Content-Type: application/json
 
 {
   "title": "",
   "price": 0,
-  "publishStatus": false,
+  "publishStatus": true,
   "author": []
 }
 
-###
+### 書籍取得API (全件)
 GET http://localhost:8080/api/v1/books
 
-###
-GET http://localhost:8080/api/v1/healthcheck
+### 書籍取得API (全件) 著者検索パターン
+@authorName = authorName
+GET http://localhost:8080/api/v1/books?
+    authorName={{authorName}}

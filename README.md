@@ -14,6 +14,10 @@ This API provides functionalities to manage information about books and authors.
 - Register and update information about books and authors
 - Retrieve books linked to authors
 
+## Docs
+
+I have my api swagger docs host in Github
+- [swagger](https://github.com/BillChai/BookManagementSystem/blob/main/swagger.yaml)
 ## Technical Stack
 
 - Language: Kotlin
@@ -45,5 +49,25 @@ This API provides functionalities to manage information about books and authors.
 ## Running the Application
 
 You can run the application using the following command:
-```bash
-./gradlew bootRun
+   ```bash
+   ./gradlew bootRun
+   ```
+
+## Running the Application
+
+You can run the application test using the following command:
+   ```bash
+   ./gradlew test
+   ```
+
+## Run API locally
+
+you can use api request in [.http file](https://github.com/BillChai/BookManagementSystem/blob/main/httpRequest/api_http_request.http)
+
+```http request
+GET http://localhost:8080/api/v1/books?authorName=author
+```
+
+## Reference
+
+[Tech stack reference](https://quo-digital.hatenablog.com/entry/2024/03/22/143542)
