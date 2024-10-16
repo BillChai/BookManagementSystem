@@ -24,7 +24,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BookResponseForm'
         '400':
-          $ref: '#/components/responses/400titleDuplicated'
+          $ref: '#/components/responses/400Validation'
         '404':
           $ref: '#/components/responses/404NotFound'
         '405':
@@ -34,7 +34,20 @@ paths:
     put:
       tags:
         - 書籍管理システム
-      description: 変更された書籍詳細情報を返却する
+      description: |
+        変更された書籍詳細情報を返却する
+        以下パラメータはOptionとなるが，入力する場合は以下のValidationチェックされる<br>
+        
+        入力Validation<br>
+        
+        1. タイトル:　空文字許可しない<br>
+        2. 価格: 0以上である<br>
+        3. 著者: 最低1人の著者を持つ。複数の著者を持つことが可能<br>
+          a. 著者名: 空文字許可しない<br>
+          b. 誕生日: 未来日は許可しない<br>
+        4. 出版状況: 出版済み = true or 未出版 = false<br>
+        　a. 出版済みの場合は未出版へ変更できない
+
       summary: 書籍変更API（1件）
       operationId: updateBookById
       parameters:
@@ -43,17 +56,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BookReceiveForm'
+              $ref: '#/components/schemas/BookUpdateForm'
         required: true
       responses:
         '200':
-          description: 1件書籍情報取得
+          description: 1件書籍情報更新
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/BookResponseForm'
         '400':
-          $ref: '#/components/responses/400titleDuplicated'
+          $ref: '#/components/responses/400Validation'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '404':
@@ -73,14 +86,11 @@ paths:
 
       summary: 書籍一覧取得API
       operationId: getBooks
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                authorName:
-                  type: string
+      parameters:
+        - in: query
+          name: "authorName"
+          schema:
+            type: string
       responses:
         '200':
           description: 書籍情報取得
@@ -93,7 +103,16 @@ paths:
     post:
       tags:
         - 書籍管理システム
-      description: 書籍及び著者を登録し, 登録した書籍詳細を返却する.
+      description: | 
+        書籍及び著者を登録し, 登録した書籍詳細を返却する.<br>
+        以下パラメータは必要となる<br>
+        
+        1. タイトル:　空文字許可しない<br>
+        2. 価格: 0以上である<br>
+        3. 著者: 最低1人の著者を持つ。複数の著者を持つことが可能<br>
+           a. 著者名: 空文字許可しない<br>
+           b. 誕生日: 未来日は許可しない<br>
+        4. 出版状況: 出版済み = true or 未出版 = false
       summary: 書籍登録API（1件）
       operationId: createBook
       requestBody:
@@ -110,7 +129,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BookResponseForm'
         '400':
-          $ref: '#/components/responses/400titleDuplicated'
+          $ref: '#/components/responses/400Validation'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '405':
@@ -134,7 +153,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthorResponseForm'
         '400':
-          $ref: '#/components/responses/400AuthorDuplicated'
+          $ref: '#/components/responses/400Validation'
         '404':
           $ref: '#/components/responses/404NotFound'
         '405':
@@ -153,7 +172,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AuthorReceiveForm'
+              $ref: '#/components/schemas/AuthorUpdateForm'
         required: true
       responses:
         '200':
@@ -163,7 +182,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthorResponseForm'
         '400':
-          $ref: '#/components/responses/400AuthorDuplicated'
+          $ref: '#/components/responses/400Validation'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '404':
@@ -178,20 +197,10 @@ paths:
       tags:
         - 著者管理システム
       description: |
-        著者一覧情報取得API<br>
-        authorパラメータ入力する場合は著者名で検索する
+        著者一覧情報取得API
 
       summary: 著者一覧取得API
       operationId: getAuthors
-      parameters:
-        - in: body
-          name: author
-          description: 著者名で検索する
-          schema:
-            type: object
-            properties:
-              authorName:
-                type: string
       responses:
         '200':
           description: 著者情報取得
@@ -221,7 +230,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthorResponseForm'
         '400':
-          $ref: '#/components/responses/400AuthorDuplicated'
+          $ref: '#/components/responses/400Validation'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '405':
@@ -230,6 +239,40 @@ paths:
           $ref: '#/components/responses/500ServerError'
 components:
   schemas:
+    BookUpdateForm:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 書籍タイトル
+          example: "Book A"
+        price:
+          type: number
+          format: float
+          description: 書籍価格
+          example: 100
+        publishStatus:
+          type: string
+          enum: [ "unpublish","published" ]
+          example: "published"
+        authors:
+          type: array
+          description: 著者情報リスト
+          items:
+            type: object
+            required:
+              - authorName
+              - birthdate
+            properties:
+              authorName:
+                type: string
+                description: 著者名
+                example: "author A"
+              birthdate:
+                type: string
+                format: date
+                description: 著者誕生日 (YYYY-MM-DD)
+                example: "2023-01-01"
     BookReceiveForm:
       required:
         - title
@@ -307,6 +350,18 @@ components:
                 format: date
                 description: 著者誕生日 (YYYY-MM-DD)
                 example: "2023-01-01"
+    AuthorUpdateForm:
+      type: object
+      properties:
+        authorName:
+          type: string
+          description: 著者名
+          example: "author A"
+        birthdate:
+          type: string
+          format: date
+          description: 著者誕生日 (YYYY-MM-DD)
+          example: "2023-01-01"
     AuthorReceiveForm:
       type: object
       required:
@@ -348,8 +403,8 @@ components:
       description: bearer OAuth token after gitHub Login
       scheme: bearer
   responses:
-    400titleDuplicated: # Can be referenced as '#/components/responses/400titleDuplicated'
-      description: ID Not Found
+    400Validation: # Can be referenced as '#/components/responses/400Validation'
+      description: validation error
       content:
         'application/json':
           schema:
@@ -358,28 +413,17 @@ components:
               timestamp:
                 type: string
                 format: date-time
+              status:
+                type: string
+                example: 400
+              error:
+                type: string
               message:
                 type: string
                 example: "Invalid Request"
-              detail:
+              path:
                 type: string
-                example: "Book {title} has already exist"
-    400AuthorDuplicated: # Can be referenced as '#/components/responses/400AuthorDuplicated'
-      description: ID Not Found
-      content:
-        'application/json':
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                format: date-time
-              message:
-                type: string
-                example: "Invalid Request"
-              detail:
-                type: string
-                example: "Author {authorName} has already exist"
+                example: "/api/v1/path"
     UnauthorizedError:
       description: Access token is missing or invalid
     404NotFound: # Can be referenced as '#/components/responses/404NotFound'
@@ -392,11 +436,17 @@ components:
               timestamp:
                 type: string
                 format: date-time
+              status:
+                type: string
+                example: 404
+              error:
+                type: string
               message:
                 type: string
                 example: "ID Not Found"
-              detail:
+              path:
                 type: string
+                example: "/api/v1/path"
     405NotAllowed: # Can be referenced as '#/components/responses/405NotAllowed'
       description: Method Not Supported
       content:
@@ -407,12 +457,17 @@ components:
               timestamp:
                 type: string
                 format: date-time
+              status:
+                type: string
+                example: 405
+              error:
+                type: string
               message:
                 type: string
                 example: "Method Not Supported"
-              detail:
+              path:
                 type: string
-                example: "Request method 'method_name' not supported"
+                example: "/api/v1/path"
     500ServerError: # Can be referenced as '#/components/responses/500ServerError'
       description: Unexpected Error
       content:
@@ -423,11 +478,17 @@ components:
               timestamp:
                 type: string
                 format: date-time
+              status:
+                type: string
+                example: 500
+              error:
+                type: string
               message:
                 type: string
-                example: "Something went wrong ...  Server Error"
-              detail:
+                example: "Server Error message"
+              path:
                 type: string
+                example: "/api/v1/path"
   parameters:
     BookIDParam: # Can be referenced via '#/components/parameters/BookIDParam'
       name: id
