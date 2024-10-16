@@ -98,3 +98,13 @@ flyway {
     user = "myuser"
     password = "secret"
 }
+
+// Define a task to run Flyway migrations before jOOQ code generation
+tasks.named("generateJooq") {
+    dependsOn("flywayMigrate")
+}
+
+// Ensure jOOQ generation happens before the build task
+tasks.named("build") {
+    dependsOn("generateJooq")
+}
