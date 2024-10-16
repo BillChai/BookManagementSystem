@@ -17,7 +17,7 @@ This API provides functionalities to manage information about books and authors.
 ## Docs
 
 I have my api swagger docs host in Github
-- [swagger](https://github.com/BillChai/BookManagementSystem)
+- [swagger]([https://github.com/BillChai/BookManagementSystem](https://billchai.github.io/BookManagementSystem/))
 ## Technical Stack
 
 - Language: Kotlin
