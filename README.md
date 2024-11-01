@@ -16,7 +16,7 @@ This API provides functionalities to manage information about books and authors.
 
 ## Docs
 
-api swagger docs host in Github
+Api swagger docs host in Github
 - [swagger](https://billchai.github.io/BookManagementSystem/)
 ## Technical Stack
 
@@ -55,7 +55,7 @@ You can run the application using the following command:
 
 ## Running the Application
 
-You can run the application test using the following command:
+Run the application test using the following command:
    ```bash
    ./gradlew test
    ```
