@@ -16,7 +16,7 @@ This API provides functionalities to manage information about books and authors.
 
 ## Docs
 
-I have my api swagger docs host in Github
+api swagger docs host in Github
 - [swagger](https://billchai.github.io/BookManagementSystem/)
 ## Technical Stack
 
